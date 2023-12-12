@@ -157,7 +157,7 @@ fn part1(records: &Records) -> u32 {
 
 fn test(conditions: &Conditions, group_sizes: &GroupSizes, line: &String) {
     println!("original:\n{line}");
-    println!("extended:\n{} {group_sizes:?}", conditions_to_string(conditions));
+    println!("extended:\n{}\n{group_sizes:?}", conditions_to_string(conditions));
 
     let character_count = conditions.len();
 
@@ -183,21 +183,28 @@ fn test(conditions: &Conditions, group_sizes: &GroupSizes, line: &String) {
 
     for (i, condition) in conditions.iter().enumerate() {
         match condition {
-            Condition::Operational => todo!(),
-            Condition::Damaged => todo!(),
+            Condition::Operational => (),
+            Condition::Damaged => (),
             Condition::Unknown => {
                 // can we split?
                 let seen_characters = i + 1;
                 let remaining_characters = character_count - seen_characters;
                 let first_lower_bound = first_sum_of_sizes + first_contiguous_group_count - 1;
+                println!("first_lower_bound: {first_lower_bound}");
                 let second_lower_bound = second_sum_of_sizes + second_contiguous_group_count - 1;
+                println!("second_lower_bound: {second_lower_bound}");
+
+                // println!("{}", conditions_to_string(&conditions[0..seen_characters].to_vec()));
 
                 if seen_characters >= first_lower_bound && remaining_characters >= second_lower_bound {
                     println!("Can split:");
-                    let (first_split, second_split) = conditions.split_at(i);
+                    let (first_split, second_split) = conditions.split_at(seen_characters);
                     println!("first split:\n{}", conditions_to_string(&first_split.to_vec()));
                     println!("second split:\n{}", conditions_to_string(&second_split.to_vec()));
-                } 
+                    println!();
+
+                    test(&first_split.to_vec(), &first_half, line);
+                }
             },
         }
     }

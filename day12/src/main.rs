@@ -155,10 +155,60 @@ fn part1(records: &Records) -> u32 {
         .sum()
 }
 
+fn test(conditions: &Conditions, group_sizes: &GroupSizes, line: &String) {
+    println!("original:\n{line}");
+    println!("extended:\n{} {group_sizes:?}", conditions_to_string(conditions));
+
+    let character_count = conditions.len();
+
+    let unknown_count = conditions.iter().filter(|condition| matches!(condition, Condition::Unknown)).count();
+    println!("'?' count: {unknown_count}");
+    let sum_of_sizes: usize = group_sizes.iter().map(|g| usize::from(*g)).sum();
+    println!("sum of sizes: {sum_of_sizes}");
+
+    let mut total: usize = 0;
+    let (first_half, second_half): (Vec<u8>, Vec<u8>) = group_sizes.iter().partition(|&group_size| {
+        total += usize::from(*group_size);
+
+        total < (sum_of_sizes / 2)
+    });
+
+    println!("first_half: {first_half:?}");
+    println!("second_half: {second_half:?}");
+
+    let first_sum_of_sizes: usize = first_half.iter().map(|g| usize::from(*g)).sum();
+    let second_sum_of_sizes: usize = second_half.iter().map(|g| usize::from(*g)).sum();
+    let first_contiguous_group_count = first_half.len();
+    let second_contiguous_group_count = second_half.len();
+
+    for (i, condition) in conditions.iter().enumerate() {
+        match condition {
+            Condition::Operational => todo!(),
+            Condition::Damaged => todo!(),
+            Condition::Unknown => {
+                // can we split?
+                let seen_characters = i + 1;
+                let remaining_characters = character_count - seen_characters;
+                let first_lower_bound = first_sum_of_sizes + first_contiguous_group_count - 1;
+                let second_lower_bound = second_sum_of_sizes + second_contiguous_group_count - 1;
+
+                if seen_characters >= first_lower_bound && remaining_characters >= second_lower_bound {
+                    println!("Can split:");
+                    let (first_split, second_split) = conditions.split_at(i);
+                    println!("first split:\n{}", conditions_to_string(&first_split.to_vec()));
+                    println!("second split:\n{}", conditions_to_string(&second_split.to_vec()));
+                } 
+            },
+        }
+    }
+
+    todo!();
+}
+
 fn part2(records: &Records) -> u32 {
     records.records.iter()
         .map(|(conditions, group_sizes, line)| {
-            println!("line: {line}");
+
 
             let group_sizes = vec![group_sizes.clone(); 5].concat();
             let mut conditions_extended = conditions.clone();
@@ -184,15 +234,16 @@ fn part2(records: &Records) -> u32 {
                 conditions_extended.pop();
             }
 
-            println!("{} {group_sizes:?}", conditions_to_string(&conditions_extended));
+            test(&conditions_extended, &group_sizes, line);
 
-            let operational_count = conditions_extended.iter().filter(|condition| matches!(condition, Condition::Operational)).count();
-            let required_operational_count = group_sizes.len() - 1;
-            println!("current operational_count: {operational_count}, required splits: {required_operational_count}, remaining: {}", (required_operational_count as i32) - (operational_count as i32));
-            // let arrangement_count = backtrack_arangements(conditions, group_sizes);
-            // println!("arrangements: {arrangement_count}");
 
-            println!();
+            // let operational_count = conditions_extended.iter().filter(|condition| matches!(condition, Condition::Operational)).count();
+            // let required_operational_count = group_sizes.len() - 1;
+            // println!("current operational_count: {operational_count}, required splits: {required_operational_count}, remaining: {}", (required_operational_count as i32) - (operational_count as i32));
+            // // let arrangement_count = backtrack_arangements(conditions, group_sizes);
+            // // println!("arrangements: {arrangement_count}");
+
+            // println!();
 
             0
         })
